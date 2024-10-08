@@ -3,38 +3,36 @@ const mongoose = require("mongoose");
 const jobSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: [true, "Please provide a title"],
   },
   company: {
     type: String,
-    requrired: true,
+    requrired: [true, "Please provide a company"],
   },
   location: {
     type: String,
-    required: true,
+    required: [true, "Please provide a location"],
   },
   salary: {
     type: Number,
-    required: true,
+    required: [true, "Please provide a salary"],
   },
   description: {
     type: String,
-    required: true,
   },
   jobType: {
     type: String,
     enum: ["full-time", "part-time", "contract", "temporary", "internship"],
-    required: true,
+    required: [true, "Please provide a job type"],
   },
   postedBy: {
     type: mongoose.Schema.ObjectId,
     ref: "User",
-    required: true,
+    required: [true, "Please provide a user (only employers can post jobs)"],
   },
   datePosted: {
     type: Date,
     default: Date.now,
-    write: false,
   },
 });
 
