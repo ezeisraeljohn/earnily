@@ -2,13 +2,9 @@ const moongose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    const conn = await moongose.connect("mongodb://localhost:27017/jobsearch", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      useCreateIndex: true,
-    });
+    const conn = await moongose.connect("mongodb://localhost:27017/jobsearch");
     console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch {
+  } catch (err) {
     console.log(err);
     process.exit(1);
   }
