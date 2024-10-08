@@ -1,4 +1,4 @@
-const createJob = require("../controllers/job_controller").createJob;
+const { createJob } = require("../controllers/job_controller");
 const { protect, authorize } = require("../middlewares/auth_middleware");
 const router = require("express").Router();
 
