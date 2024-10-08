@@ -14,7 +14,7 @@ const protect = async (req, res, next) => {
     return res.status(401).json({ msg: "No token, authorization denied" });
   }
   try {
-    token = bearerToken.split(" ")[1];
+    const token = bearerToken.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET);
     req.user = await User.findById(decoded.userId);
     if (!req.user)
@@ -27,3 +27,17 @@ const protect = async (req, res, next) => {
     res.status(500).json({ msg: error.message });
   }
 };
+
+/**
+ *
+ * @param {string} role
+ * @returns
+ */
+const authorize = (role) => (req, res, next) => {
+  if (req.user.role !== role) {
+    return res.status(403).json({ msg: "You are not authorized" });
+  }
+  next();
+};
+
+module.exports = { protect, authorize };
