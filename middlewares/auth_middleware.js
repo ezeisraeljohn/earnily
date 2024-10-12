@@ -23,7 +23,7 @@ const protect = async (req, res, next) => {
         .json({ msg: "Invalid token or token has expired" });
     next();
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     res.status(500).json({ msg: error.message });
   }
 };
