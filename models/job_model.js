@@ -13,10 +13,15 @@ const jobSchema = new mongoose.Schema({
     type: String,
     required: [true, "Please provide a location"],
   },
-  salary: {
+  salaryMin: {
     type: Number,
     required: [true, "Please provide a salary"],
   },
+  salaryMax: {
+    type: Number,
+    required: [true, "Please provide a salary"],
+  },
+
   description: {
     type: String,
   },
