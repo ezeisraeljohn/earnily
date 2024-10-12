@@ -10,12 +10,21 @@ const Job = require("../models/index").Job;
  */
 const createJob = async (req, res) => {
   try {
-    const { title, description, location, jobType, salary, company } = req.body;
+    const {
+      title,
+      description,
+      location,
+      jobType,
+      salaryMin,
+      salaryMax,
+      company,
+    } = req.body;
     const job = new Job({
       title,
       description,
       location,
-      salary,
+      salaryMin,
+      salaryMax,
       company,
       jobType,
       postedBy: req.user.id,
@@ -117,10 +126,64 @@ const deleteJob = async (req, res) => {
   }
 };
 
-const getJobs = async (req, res) => {
+const getMyJobs = async (req, res) => {
   try {
     const jobs = await Job.find({ postedBy: req.user.id });
     res.status(200).json({ success: true, status: 200, data: jobs });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ msg: error.message });
+  }
+};
+
+const getJobs = async (req, res) => {
+  try {
+    const {
+      location,
+      title,
+      jobType,
+      salaryMin,
+      salaryMax,
+      company,
+      page,
+      limit,
+    } = req.query;
+    const query = {};
+    if (location) {
+      query.location = { $regex: location, $options: "i" }; // i for case insensitive
+    }
+    if (title) {
+      query.title = { $regex: title, $options: "i" };
+    }
+    if (jobType) {
+      query.jobType = jobType;
+    }
+    if (salaryMin && salaryMax) {
+      query.salary = { $gte: salaryMin, $lte: salaryMax };
+    }
+    if (company) {
+      query.company = { $regex: company, $options: "i" };
+    }
+    const currentPage = parseInt(page, 10) || 1;
+    const itemsPerPage = parseInt(limit, 10) || 10;
+    const skip = (currentPage - 1) * itemsPerPage;
+    const jobs = await Job.find(query)
+      .sort("-datePosted")
+      .skip(skip)
+      .limit(itemsPerPage);
+    const totalJobs = await Job.countDocuments(query);
+    const totalPages = Math.ceil(totalJobs / itemsPerPage);
+    res.status(200).json({
+      success: true,
+      status: 200,
+      pagination: {
+        page: currentPage,
+        totalPages,
+        count: jobs.length,
+        total: totalJobs,
+      },
+      data: jobs,
+    });
   } catch (error) {
     console.log(error);
     res.status(500).json({ msg: error.message });
@@ -148,4 +211,11 @@ const getJob = async (req, res) => {
   }
 };
 
-module.exports = { createJob, updateJob, deleteJob, getJobs, getJob };
+module.exports = {
+  createJob,
+  updateJob,
+  deleteJob,
+  getJob,
+  getJobs,
+  getMyJobs,
+};
