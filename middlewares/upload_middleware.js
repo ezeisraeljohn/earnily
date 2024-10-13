@@ -1,24 +1,29 @@
 const multer = require("multer");
 const path = require("path");
+const { BlobServiceClient } = require("@azure/storage-blob");
+const { v4: uuidv4 } = require("uuid");
 
-/**
- * @description This function is used to upload files to the server
- * @param {Object} req - The request object
- * @param {Object} file - The file object
- * @param {Function} cb - The callback function
- * @returns {void}
- */
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/resumes");
-  },
-  filename: (req, file, cb) => {
-    cb(
-      null,
-      `${file.fieldname}-${Date.now()}${path.extname(file.originalname)}`
-    );
-  },
-});
+const AZURE_STORAGE_CONNECTION_STRING =
+  process.env.AZURE_STORAGE_CONNECTION_STRING;
+
+const blobServiceClient = BlobServiceClient.fromConnectionString(
+  AZURE_STORAGE_CONNECTION_STRING
+);
+
+const containerName = "resumes";
+
+const uploadFileToAzure = async (file) => {
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  const blobName = `${uuidv4()}-${file.originalname}`;
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+  await blockBlobClient.uploadData(file.buffer, {
+    blobHTTPHeaders: { blobContentType: file.mimetype },
+  });
+  return blockBlobClient.url;
+};
+
+const storage = multer.memoryStorage();
 
 const checkFileType = (file, cb) => {
   const filetypes = /docx|docs|pdf/; //Accept only pdfs and docs
@@ -39,4 +44,4 @@ const upload = multer({
   limits: { fileSize: 1024 * 1024 * 5 }, //5MB
 });
 
-module.exports = upload;
+module.exports = { upload, uploadFileToAzure };
