@@ -6,7 +6,7 @@ const {
   updateApplication,
 } = require("../controllers/application_controller");
 const { protect, authorize } = require("../middlewares/auth_middleware");
-const upload = require("../middlewares/upload_middleware");
+const { upload } = require("../middlewares/upload_middleware");
 
 const router = express.Router();
 
