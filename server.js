@@ -16,7 +16,7 @@ app.use("/api/v1", applicationRouter);
 app.use("/api/v1", authRouter);
 app.use("/api/v1", jobsRouter);
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
