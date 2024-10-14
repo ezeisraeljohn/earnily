@@ -1,5 +1,6 @@
 const Application = require("../models/application_model");
 const Job = require("../models/job_model");
+const { uploadFileToAzure } = require("../middlewares/upload_middleware");
 
 const applyForJobs = async (req, res) => {
   const { coverLetter, resume, jobId } = req.body;
@@ -28,10 +29,11 @@ const applyForJobs = async (req, res) => {
     if (!req.files || !req.files.resume) {
       return res.status(400).json({ msg: "Resume is required" });
     }
+    const resumeFileUrl = await uploadFileToAzure(req.files.resume[0]);
     const application = await Application.create({
       job: jobId,
       applicant: req.user.id,
-      resume: `${req.baseUrl}/${req.files.resume[0].path}`,
+      resume: resumeFileUrl,
       coverLetter,
     });
     res.status(201).json({
