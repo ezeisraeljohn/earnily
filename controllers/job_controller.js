@@ -193,6 +193,10 @@ const getJobs = async (req, res) => {
 const getJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
+    if (!job)
+      res
+        .status(404)
+        .json({ success: false, status: 404, message: "Job not found" });
     if (job.postedBy.toString() !== req.user.id) {
       return res.status(401).json({
         success: false,
