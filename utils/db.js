@@ -5,7 +5,7 @@ dotenv.config();
 
 const connectDB = async () => {
   try {
-    const MONGO_URI = process.env.TEST_MONGO_URL || process.env.MONGO_URI;
+    const MONGO_URI = process.env.TEST_MONGO_URL || process.env.MONGO_URL;
     const conn = await moongose.connect(MONGO_URI, {
       serverSelectionTimeoutMS: 60000,
     });
