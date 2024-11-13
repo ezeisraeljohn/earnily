@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
+    "test": "NODE_ENV=test jest --detectOpenHandles",
     "lint": "./node_modules/.bin/eslint",
     "check-lint": "lint [0-9]*.js",
     "start-server": "nodemon --exec babel-node --presets @babel/preset-env ./server.js",
@@ -31,6 +32,7 @@
     "multer": "^1.4.5-lts.1",
     "redis": "^4.7.0",
     "sha1": "^1.1.1",
+    "supertest": "^7.0.0",
     "uuid": "^8.2.0",
     "uuidv4": "^6.2.13"
   },
@@ -41,7 +43,6 @@
     "@babel/preset-env": "^7.8.2",
     "@babel/register": "^7.8.0",
     "@types/express": "^4.17.21",
-    "chai": "^4.2.0",
     "eslint": "^6.4.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
@@ -49,6 +50,7 @@
     "mocha": "^10.7.3",
     "nodemon": "^3.1.7",
     "request": "^2.88.0",
-    "sinon": "^7.5.0"
+    "sinon": "^7.5.0",
+    "superset": "^2.0.1"
   }
 }
