@@ -73,7 +73,7 @@ const login = async (req, res) => {
       data: { token },
     });
   } catch (error) {
-    console.error(error.message);
+    console.error(error);
     res.status(500).json({ msg: error.message });
   }
 };
