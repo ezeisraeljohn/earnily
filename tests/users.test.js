@@ -38,4 +38,33 @@ describe("User Testing", () => {
       expect(response.status).toBe(400);
     });
   });
+
+  describe("Login Testing", () => {
+    it("Should login the user", async () => {
+      const response = await request(app).post("/api/v1/login").send({
+        email: detail.email,
+        password: detail.password,
+      });
+      expect(response.status).toBe(200);
+    });
+    it("Should not login with wrong credentials", async () => {
+      const response = await request(app).post("/api/v1/login").send({
+        email: "tyrel@gmail.com",
+        password: "Istinatia",
+      });
+      expect(response.status).toBe(400);
+    });
+    it("Should not login if the email is not provided", async () => {
+      const response = await request(app).post("/api/v1/login").send({
+        password: "eesiddls",
+      });
+      expect(response.status).toBe(400);
+    });
+    it("Should not login if the password is not provided", async () => {
+      const response = await request(app).post("/api/v1/login").send({
+        email: "ezeisraeljohn@gmail.com",
+      });
+      expect(response.status).toBe(400);
+    });
+  });
 });
