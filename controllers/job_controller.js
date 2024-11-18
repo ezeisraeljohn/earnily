@@ -1,3 +1,5 @@
+const { default: mongoose } = require("mongoose");
+
 const Job = require("../models/index").Job;
 
 /**
@@ -192,6 +194,13 @@ const getJobs = async (req, res) => {
 
 const getJob = async (req, res) => {
   try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(400).json({
+        success: false,
+        status: 404,
+        message: "Job not found",
+      });
+    }
     const job = await Job.findById(req.params.id);
     if (!job)
       res
