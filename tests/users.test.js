@@ -2,7 +2,7 @@ const request = require("supertest");
 const app = require("../server");
 const mongoose = require("mongoose");
 const User = require("../models/user_model");
-const user_detail = require("./user_test_data");
+const user_detail = require("../utils/user_test_data");
 
 let detail;
 
@@ -18,6 +18,7 @@ describe("User Testing", () => {
   describe("Creation/Registration Testing", () => {
     //Registers a user
     it("Should create a user", async () => {
+      detail.email = "Israel@gmail.com";
       const response = await request(app).post("/api/v1/register").send(detail);
       expect(response.status).toBe(201);
       expect(response.body.data.firstName).toBe("john");
@@ -65,6 +66,15 @@ describe("User Testing", () => {
         email: "ezeisraeljohn@gmail.com",
       });
       expect(response.status).toBe(400);
+      expect(response.body.msg).toBe("Invalid Credentials");
+    });
+    it("Should not take any other type other than a string for the email", async () => {
+      const response = await request(app).post("/api/v1/login").send({
+        email: 133,
+        password: 21122,
+      });
+      expect(response.status).toBe(400);
+      expect(response.body.msg).toBe("Invalid Credentials");
     });
   });
 });
