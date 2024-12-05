@@ -40,7 +40,7 @@ describe("Jobs Endpoints", () => {
       expect(response.status).toBe(201);
     });
 
-    it("Should not create a Job with wrong no auth", async () => {
+    it("Should not create a Job with wrong or no auth", async () => {
       const response = await request(app)
         .post("/api/v1/jobs")
         .send(job_details)
