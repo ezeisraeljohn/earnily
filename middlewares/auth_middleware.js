@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/index").User;
+const { sendSuccess, sendFailure } = require("../utils/responses");
 
 /**
  * @desc Middleware to verify token
@@ -11,20 +12,17 @@ const User = require("../models/index").User;
 const protect = async (req, res, next) => {
   const bearerToken = req.header("Authorization");
   if (!bearerToken || !bearerToken.startsWith("Bearer ")) {
-    return res.status(401).json({ msg: "No token, authorization denied" });
+    sendFailure(res, 401, "No token, authorization denied");
   }
   try {
     const token = bearerToken.split(" ")[1];
     const decoded = jwt.verify(token, process.env.SECRET);
     req.user = await User.findById(decoded.userId);
-    if (!req.user)
-      return res
-        .status(401)
-        .json({ msg: "Invalid token or token has expired" });
+    if (!req.user) sendFailure(res, 401, "Invalid token or token has expired");
     next();
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: error.message });
+    sendFailure(res, 401, "Invalid token or token has expired");
   }
 };
 
@@ -35,7 +33,7 @@ const protect = async (req, res, next) => {
  */
 const authorize = (role) => (req, res, next) => {
   if (req.user.role !== role) {
-    return res.status(403).json({ msg: "You are not authorized" });
+    sendFailure(res, 403, "You are not authorized to access this route");
   }
   next();
 };
