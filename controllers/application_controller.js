@@ -1,33 +1,29 @@
 const Application = require("../models/application_model");
 const Job = require("../models/job_model");
 const { uploadFileToAzure } = require("../middlewares/upload_middleware");
+const { sendFailure, sendSuccess } = require("../utils/responses");
 
+/**
+ * @desc Apply for jobs
+ * @param {import('express').Request} req default request object
+ * @param {import('express').Response} res default response object
+ * @returns {Promise<void>}
+ */
 const applyForJobs = async (req, res) => {
   const { coverLetter, resume, jobId } = req.body;
   try {
     const job = await Job.findById(jobId);
-    if (!job)
-      return res.status(400).json({
-        success: false,
-        status: 404,
-        message: "Job not found",
-      });
+    if (!job) sendFailure(res, 404, "Job not found");
 
     // Check for existing application
     const existingApplication = await Application.findOne({
       applicant: req.user.id,
       job: jobId,
     });
-    if (existingApplication)
-      return res.status(400).json({
-        success: false,
-        status: 400,
-        message: "You have already applied for this job",
-      });
-
+    sendFailure(res, 400, "You have already applied for this job");
     // Resume file required
     if (!req.files || !req.files.resume) {
-      return res.status(400).json({ msg: "Resume is required" });
+      sendFailure(res, 400, "Resume is required");
     }
     const resumeFileUrl = await uploadFileToAzure(req.files.resume[0]);
     const application = await Application.create({
@@ -36,113 +32,76 @@ const applyForJobs = async (req, res) => {
       resume: resumeFileUrl,
       coverLetter,
     });
-    res.status(201).json({
-      success: true,
-      status: 201,
-      data: application,
-    });
+    sendSuccess(res, 201, "Application submitted successfully", application);
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      success: false,
-      status: 500,
-      message: error.message,
-    });
+    sendFailure(res, 500, "Server Error");
   }
 };
 
-//Get Different Applications for Jobs
+/**
+ * @desc Get applications for a job
+ * @param {import('express').Request} req default request object
+ * @param {import('express').Response} res default response object
+ * @returns {Promise<void>}
+ */
 const getApplicationsForJob = async (req, res) => {
   try {
     const job = await Job.findById(req.params.jobId);
-    if (!job)
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        message: "Job not found",
-      });
-    if (job.postedBy.toString() !== req.user.id)
-      return res.status(401).json({
-        success: false,
-        status: 401,
-        message: "Unauthorized Access",
-      });
+    if (!job) sendFailure(res, 404, "Job not found");
+    if (job.postedBy.toString() !== req.user.id) {
+      sendFailure(res, 401, "Unauthorized Access");
+    }
     const applications = await Application.find({
       job: req.params.jobId,
     }).populate("applicant", "firstName lastName email");
-    res.status(200).json({
-      success: true,
-      status: 200,
-      data: applications,
-    });
+    sendSuccess(res, 200, "Applications retrieved successfully", applications);
   } catch (error) {
     console.log(eror);
-    res.status(500).json({
-      success: false,
-      status: 500,
-      message: error.message,
-    });
+    sendFailure(res, 500, "Server Error");
   }
 };
 
-//Get History of Applications
-
+/**
+ * @desc Get applications for a user
+ * @param {import('express').Request} req default request object
+ * @param {import('express').Response} res default response object
+ * @returns {Promise<void>}
+ */
 const getApplications = async (req, res) => {
   try {
     const applications = await Application.find({
       applicant: req.user.id,
     }).populate("job", "title company location salary jobType");
-    res.status(200).json({
-      success: true,
-      status: 200,
-      count: applications.length,
-      data: applications,
-    });
+    sendSuccess(res, 200, "Applications retrieved successfully", applications);
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      success: false,
-      status: 500,
-      message: error.message,
-    });
+    sendFailure(res, 500, "Server Error");
   }
 };
 
-// Update Application Status
+/**
+ * @desc Update application status
+ * @param {import('express').Request} req default request object
+ * @param {import('express').Response} res default response object
+ * @returns {Promise<void>}
+ */
 const updateApplication = async (req, res) => {
   try {
     const application = await Application.findById(req.params.id).populate(
       "applicant",
       "firstName lastName email"
     );
-    if (!application)
-      return res.status(404).json({
-        success: false,
-        status: 404,
-        message: "Application not found",
-      });
+    if (!application) sendFailure(res, 404, "Application not found");
     const job = await Job.findById(application.job._id);
     const postedBy = job.postedBy.toString();
-    if (postedBy !== req.user.id)
-      return res.status(401).json({
-        success: false,
-        status: 401,
-        message: "Unauthorized Access",
-      });
+    if (postedBy !== req.user.id) sendFailure(res, 401, "Unauthorized Access");
     application.status = req.body.status;
     await application.save();
-    res.status(200).json({
-      success: true,
-      status: 200,
-      data: application,
-    });
+    sendSuccess(res, 200, "Application updated successfully", application);
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      success: false,
-      status: 500,
-      message: error.message,
-    });
+    sendFailure(res, 500, "Server Error");
   }
 };
 module.exports = {
