@@ -91,6 +91,12 @@ You can test the API endpoints using Postman. Import the collection directly usi
 
 [<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw)
 
+Or you can run the test using the following command
+
+```bash
+npm test
+```
+
 ## API Documentation
 
 For detailed API documentation, visit the [Postman](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw) endpoints.
