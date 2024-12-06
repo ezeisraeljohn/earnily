@@ -1,5 +1,7 @@
 # EARNILY
 
+![Earnily](Earnily.png)
+
 ## A simple and easy to use api for setting up a simple job board.
 
 ### Features
