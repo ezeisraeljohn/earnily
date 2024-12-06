@@ -5,6 +5,7 @@ const jobsRouter = require("./src/modules/jobs/routes/job_routes");
 const applicationRouter = require("./src/modules/application/routes/application_route");
 const path = require("path");
 const cors = require("cors");
+const rateLimiter = require("./src/shared/utils/ratelimiting");
 
 const app = express();
 
@@ -13,6 +14,7 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
+app.use(rateLimiter);
 app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/v1", applicationRouter);
 app.use("/api/v1", authRouter);
