@@ -83,17 +83,17 @@ see the full documentation at [API Documentation](#api-documentation)
 
 ## Usage
 
-once you have the server running, you can interact wit the api using tools like ![Postman](https://www.postman.com/), ![Insomnia](https://insomnia.rest/), or ![curl](https://curl.se/)
+once you have the server running, you can interact wit the api using tools like [Postman](https://www.postman.com/), [Insomnia](https://insomnia.rest/), or [curl](https://curl.se/)
 
 ## Testing
 
 You can test the API endpoints using Postman. Import the collection directly using the following link:
 
-[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://documenter.getpostman.com/view/36378381/2sAXqtb23V#intro)
+[<img src="https://run.pstmn.io/button.svg" alt="Run In Postman" style="width: 128px; height: 32px;">](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw)
 
 ## API Documentation
 
-For detailed API documentation, visit the [Postman](https://documenter.getpostman.com/view/36378381/2sAXqtb23V#intro) endpoints.
+For detailed API documentation, visit the [Postman](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw) endpoints.
 
 ## Author
 
