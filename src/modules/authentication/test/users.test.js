@@ -1,8 +1,8 @@
 const request = require("supertest");
-const app = require("../server");
+const app = require("../../../../server");
 const mongoose = require("mongoose");
-const User = require("../models/user_model");
-const user_detail = require("../utils/user_test_data");
+const User = require("../../../../models/user_model");
+const user_detail = require("../../../shared/utils/user_test_data");
 
 let detail;
 
