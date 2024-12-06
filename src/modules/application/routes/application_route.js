@@ -14,14 +14,14 @@ const { upload } = require("../middlewares/upload_middleware");
 const router = express.Router();
 
 router.post(
-  "/apply",
+  "/job/:jobId/apply",
   protect,
   authorize("jobseeker"),
   upload.fields([{ name: "resume", maxCount: 1 }]),
   applyForJobs
 );
 router.get(
-  "/:jobId/applications",
+  "/job/:jobId/applications",
   protect,
   authorize("employer"),
   getApplicationsForJob
