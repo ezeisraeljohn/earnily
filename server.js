@@ -1,8 +1,8 @@
-const connectDB = require("./utils/db");
+const connectDB = require("./src/config/db");
 const express = require("express");
-const authRouter = require("./routes/auth_routes");
-const jobsRouter = require("./routes/job_routes");
-const applicationRouter = require("./routes/application_route");
+const authRouter = require("./src/modules/authentication/routes/auth_routes");
+const jobsRouter = require("./src/modules/jobs/routes/job_routes");
+const applicationRouter = require("./src/modules/application/routes/application_route");
 const path = require("path");
 const cors = require("cors");
 
