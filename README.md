@@ -2,7 +2,7 @@
 
 ![Earnily](Earnily.png)
 
-## Welcome to the Earnily API, this API is for developers looking for the write API to develope their Job seeking / Employment platform
+### Welcome to the Earnily API, this API is for developers looking for the right API to develop their Job seeking / Employment platform
 
 ## Table of Contents
 
