@@ -3,7 +3,7 @@ const user_detail = () => {
   return {
     firstName: "john",
     lastName: "Israel",
-    role: "jobseeker",
+    role: "employer",
     email: "ezeisrael2wqw@gmail.com",
     password: "2233223322",
   };

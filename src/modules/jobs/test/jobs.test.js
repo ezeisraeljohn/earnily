@@ -1,10 +1,10 @@
 const request = require("supertest");
-const app = require("../server");
+const app = require("../../../../server");
 const mongoose = require("mongoose");
-const Job = require("../models/job_model");
-const User = require("../models/user_model");
-const job_detail = require("../utils/job_test_data");
-const user_detail = require("../utils/user_test_data");
+const Job = require("../../../../models/job_model");
+const User = require("../../../../models/user_model");
+const job_detail = require("../../../shared/utils/job_test_data");
+const user_detail = require("../../../shared/utils/user_test_data");
 
 let token, user_details, job_details, id;
 

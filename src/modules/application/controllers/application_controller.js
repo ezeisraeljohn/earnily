@@ -1,7 +1,7 @@
 const Application = require("../models/application_model");
-const Job = require("../models/job_model");
+const Job = require("../../jobs/models/job_model");
 const { uploadFileToAzure } = require("../middlewares/upload_middleware");
-const { sendFailure, sendSuccess } = require("../utils/responses");
+const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
 
 /**
  * @desc Apply for jobs
