@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../../modules/authentication/models/user_model");
+const User = require("../../modules/models/user_model");
 const { sendFailure } = require("../utils/responses");
 
 /**
@@ -32,7 +32,7 @@ const protect = async (req, res, next) => {
  * @returns
  */
 const authorize = (role) => (req, res, next) => {
-  if (req.user.role !== role) {
+  if (req.user.role !== role || !req.user.isAdmin) {
     sendFailure(res, 403, "You are not authorized to access this route");
   }
   next();
