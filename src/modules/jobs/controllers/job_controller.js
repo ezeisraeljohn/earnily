@@ -1,7 +1,7 @@
 const { default: mongoose } = require("mongoose");
 const { sendSuccess, sendFailure } = require("../../../shared/utils/responses");
 
-const Job = require("../models/job_model");
+const Job = require("../../models/job_model");
 
 /**
  * @desc Create a new job
