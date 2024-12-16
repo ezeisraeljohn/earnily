@@ -29,6 +29,33 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  isActive: {
+    type: Boolean,
+    default: true,
+  },
+  profilePicture: {
+    type: String,
+    required: false,
+    default: "23239223",
+  },
+  isEmailVerified: {
+    type: Boolean,
+    default: false,
+  },
+  emailVerificationToken: {
+    type: String,
+    required: false,
+  },
+  emailVerifiedAt: {
+    type: Date,
+    required: false,
+    default: Date.now,
+  },
+  isAdmin: {
+    type: Boolean,
+    required: false,
+    default: false,
+  },
 });
 
 const User = mongoose.model("User", userSchema);
