@@ -9,8 +9,6 @@ const transporter = nodemailer.createTransport({
     user: process.env.MAIL_USERNAME,
     pass: process.env.MAIL_PASSWORD,
   },
-  debug: true,
-  logger: true,
 });
 
 transporter.verify((error) => {
@@ -24,7 +22,7 @@ transporter.verify((error) => {
 const NodeMailer = new Email({
   views: {
     options: {
-      extension: 'ejs',
+      extension: "ejs",
     },
   },
   htmlToText: false,
