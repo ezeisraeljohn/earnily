@@ -17,7 +17,7 @@ app.use(cors());
 app.use(rateLimiter);
 app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/v1", applicationRouter);
-app.use("/api/v1", authRouter);
+app.use("/api/v1/auth", authRouter);
 app.use("/api/v1", jobsRouter);
 
 const PORT = process.env.PORT || 8080;
