@@ -1,5 +1,5 @@
 const jwt = require("jsonwebtoken");
-const User = require("../../modules/models/user_model");
+const User = require("../../models/user_model");
 const { sendFailure } = require("../utils/responses");
 
 /**
@@ -32,9 +32,11 @@ const protect = async (req, res, next) => {
  * @returns
  */
 const authorize = (role) => (req, res, next) => {
-  if (req.user.role !== role || !req.user.isAdmin) {
-    sendFailure(res, 403, "You are not authorized to access this route");
-  }
+  if (req.user.role !== role && !req.user.isAdmin)
+    return sendFailure(res, 403, "You are not authorized to access this route");
+
+  if (!req.user.isEmailVerified)
+    return sendFailure(res, 403, "Please Verify Your Email");
   next();
 };
 
