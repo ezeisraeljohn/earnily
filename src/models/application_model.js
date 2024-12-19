@@ -29,6 +29,7 @@ const applicationSchema = new moongose.Schema({
     type: Date,
     default: Date.now,
   },
+  timestamps: true,
 });
 
 const Application = moongose.model("Application", applicationSchema);
