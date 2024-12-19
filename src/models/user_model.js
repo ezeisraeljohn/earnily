@@ -36,7 +36,6 @@ const userSchema = new mongoose.Schema({
   profilePicture: {
     type: String,
     required: false,
-    default: "23239223",
   },
   isEmailVerified: {
     type: Boolean,
@@ -49,7 +48,6 @@ const userSchema = new mongoose.Schema({
   emailVerifiedAt: {
     type: Date,
     required: false,
-    default: Date.now,
   },
   isAdmin: {
     type: Boolean,
