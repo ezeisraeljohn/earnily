@@ -101,6 +101,13 @@ const activateEmail = async (req, res) => {
     if (!otpObject)
       return sendFailure(res, 400, "No Otp, please request for one");
 
+    if (moment().isAfter(otpObject.expiredAt))
+      return sendFailure(
+        res,
+        400,
+        "OTP has expired, please request for a new one"
+      );
+
     const sameOtp = await bcrypt.compare(otp, otpObject.hashedOtp);
 
     if (!sameOtp) {
