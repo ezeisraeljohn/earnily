@@ -3,7 +3,11 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const { sendSuccess, sendFailure } = require("../../../shared/utils/responses");
-const { generateOtp, generateToken } = require("../../../shared/utils/helpers");
+const {
+  generateOtp,
+  generateToken,
+  generateSalt,
+} = require("../../../shared/utils/helpers");
 const {
   createOTPQuery,
   findOTPQuery,
@@ -12,7 +16,8 @@ const verifyEmail = require("../../generic/email_service");
 const moment = require("moment");
 dotenv.config();
 
-const salt = bcrypt.genSalt(10);
+const otpSalt = generateSalt(10);
+
 /**
  * @desc Register a new user
  * @route POST /api/v1/register
@@ -28,7 +33,7 @@ const register = async (req, res) => {
     const { firstName, lastName, email, password, role } = req.body;
     let user = await User.findOne({ email });
     if (user) return sendFailure(res, 400, "User already exists");
-    const salt = await bcrypt.genSalt(10);
+    const salt = generateSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     const otp = generateOtp(6);
     user = new User({
@@ -48,7 +53,7 @@ const register = async (req, res) => {
     const otpData = {
       userId: userWithoutPassword.id,
       hashedOtp: bcrypt.hashSync(String(otp), salt),
-      reason: "registration",
+      purpose: "registration",
       expiredAt: moment().add(5, "minutes"),
     };
 
@@ -67,10 +72,7 @@ const register = async (req, res) => {
       role: userWithoutPassword.role,
     };
     const token = generateToken(payload);
-    sendSuccess(res, 201, "User created successfully", {
-      token,
-      ...userWithoutPassword,
-    });
+    sendSuccess(res, 201, "User created successfully", { token });
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ msg: error.message });
@@ -99,12 +101,17 @@ const activateEmail = async (req, res) => {
     if (!otpObject)
       return sendFailure(res, 400, "No Otp, please request for one");
 
-    const sameOtp = bcrypt.compare(otp, otpObject.hashedOtp);
+    const sameOtp = await bcrypt.compare(otp, otpObject.hashedOtp);
 
     if (!sameOtp) {
       otpObject.remainingUsage -= 1;
       await otpObject.save();
-      return sendFailure(res, 400, "Invalid OTP");
+      const remaining = otpObject.remainingUsage;
+      return sendFailure(
+        res,
+        400,
+        `Invalid OTP you have ${remaining} trials remaining`
+      );
     }
     user.isEmailVerified = true;
     user.emailVerifiedAt = Date.now();
@@ -112,6 +119,39 @@ const activateEmail = async (req, res) => {
     sendSuccess(res, 200, "Email verified successfully", { userId: user._id });
   } catch (err) {
     console.error(err);
+    return sendFailure(res, 500, "An error occured");
+  }
+};
+
+const resendOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const salt = generateSalt(10);
+    const user = await User.findOne({ email });
+    if (!user) return sendFailure(res, 400, "User not found");
+    if (user.isEmailVerified)
+      return sendFailure(res, 400, "User already verified");
+
+    const otp = generateOtp(6);
+    const otpData = {
+      userId: user._id,
+      hashedOtp: bcrypt.hashSync(String(otp), salt),
+      purpose: "registration",
+      expiredAt: moment().add(5, "minutes"),
+    };
+    const value = await createOTPQuery(otpData);
+    const emailData = { email: user.email, otp };
+    try {
+      await verifyEmail(emailData);
+    } catch (err) {
+      console.error("Failed to send verification email:", err);
+    }
+    const data = { userId: req.user.id, purpose: "registration" };
+    const otpObject = await findOTPQuery(data);
+    sendSuccess(res, 200, "OTP sent successfully");
+  } catch (error) {
+    console.error(error);
+    return sendFailure(res, 500, "An error occured");
   }
 };
 
@@ -134,11 +174,21 @@ const login = async (req, res) => {
 
     const payload = { userId: user._id, email: user.email, role: user.role };
     const token = generateToken(payload);
-    sendSuccess(res, 200, "Token retrieved successfully", { token });
+    const {
+      password: password1,
+      __v,
+      ...userWithoutPassword
+    } = user.toObject();
+    userWithoutPassword.id = userWithoutPassword._id;
+    delete userWithoutPassword._id;
+    sendSuccess(res, 200, "Token retrieved successfully", {
+      token,
+      user: userWithoutPassword,
+    });
   } catch (error) {
     console.error(error);
     sendFailure(res, 500, "An error occurred");
   }
 };
 
-module.exports = { register, login, activateEmail };
+module.exports = { register, login, activateEmail, resendOTP };
