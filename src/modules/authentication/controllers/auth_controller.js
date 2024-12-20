@@ -226,7 +226,7 @@ const verifyPasswordResetOTP = async (req, res) => {
     }
     user.isPasswordReset = true;
     user.isPasswordResetExpiredAt = moment().add(5, "minutes");
-    user.save();
+    await user.save();
     return sendSuccess(res, 200, "OTP verified successfully");
   } catch (error) {
     console.error(error);
@@ -234,9 +234,42 @@ const verifyPasswordResetOTP = async (req, res) => {
   return sendFailure(res, 500, "An error occured");
 };
 
-const passwordRest = async (req, res) => {
-        
-}
+const passwordReset = async (req, res) => {
+  const { newPassword, confirmPassword } = req.body;
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return sendFailure(res, 400, "User not found");
+    if (!user.isEmailVerified)
+      return sendFailure(res, 400, "Please Verify your Email");
+    if (!user.isPasswordReset)
+      return sendFailure(res, 400, "No password reset request found");
+
+    if (
+      moment().isAfter(user.isPasswordResetExpiredAt) ||
+      !user.isPasswordResetExpiredAt
+    ) {
+      user.isPasswordReset = false;
+      await user.save();
+      return sendFailure(
+        res,
+        400,
+        "Password reset request has expired initiate a new one"
+      );
+    }
+    if (newPassword !== confirmPassword)
+      return sendFailure(res, 400, "Passwords do not match");
+
+    const salt = generateSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    user.password = hashedPassword;
+    user.isPasswordReset = false;
+    await user.save();
+    return sendSuccess(res, 200, "Password updated successfully");
+  } catch (error) {
+    console.error(error);
+    return sendFailure(res, 500, "An error occured");
+  }
+};
 
 /**
  * @description Login user
@@ -281,5 +314,5 @@ module.exports = {
   resendOTP,
   sendPasswordResetOTP,
   verifyPasswordResetOTP,
-  passwordReset
+  passwordReset,
 };
