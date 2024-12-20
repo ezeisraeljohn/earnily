@@ -12,7 +12,7 @@ const verifyEmail = (emailData) => {
     },
     locals: {
       locale: "en",
-      otp: emailData.otp
+      otp: emailData.otp,
     },
   }).catch((err) => {
     console.error(err);
@@ -20,4 +20,22 @@ const verifyEmail = (emailData) => {
   console.log("Email sent");
 };
 
-module.exports = verifyEmail;
+const verifyPasswordResetEmail = (emailData) => {
+  NodeMailer.send({
+    template: "password_reset",
+    message: {
+      from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_ADDRESS}>`,
+      to: emailData.email,
+      subject: `${emailHeader}: Password Reset`,
+    },
+    locals: {
+      locale: "en",
+      otp: emailData.otp,
+    },
+  }).catch((err) => {
+    console.error(err);
+  });
+  console.log("Email sent");
+};
+
+module.exports = { verifyEmail, verifyPasswordResetEmail };
