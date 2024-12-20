@@ -16,13 +16,15 @@ const protect = async (req, res, next) => {
   }
   try {
     const token = bearerToken.split(" ")[1];
+    if (!token) return sendSuccess(res, 401, "Invalid Token");
     const decoded = jwt.verify(token, process.env.SECRET);
     req.user = await User.findById(decoded.userId);
-    if (!req.user) sendFailure(res, 401, "Invalid token or token has expired");
+    if (!req.user)
+      return sendFailure(res, 401, "Invalid token or token has expired");
     next();
   } catch (error) {
     console.error(error);
-    sendFailure(res, 401, "Invalid token or token has expired");
+    return sendFailure(res, 401, "Invalid token or token has expired");
   }
 };
 
