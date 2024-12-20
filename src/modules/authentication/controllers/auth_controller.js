@@ -12,7 +12,10 @@ const {
   createOTPQuery,
   findOTPQuery,
 } = require("../../one_time_pin/onetimepin_queries");
-const verifyEmail = require("../../generic/email_service");
+const {
+  verifyEmail,
+  verifyPasswordResetEmail,
+} = require("../../generic/email_service");
 const moment = require("moment");
 dotenv.config();
 
@@ -82,7 +85,7 @@ const register = async (req, res) => {
 /**
  * @description Activate user account
  * @route POST /api/v1/verify-email
- * @access Public
+ * @access Private
  * @type {import('express').RequestHandler}
  * @param {import('express').Request} req default request object
  * @param {import('express').Response} res default response object
@@ -117,7 +120,7 @@ const activateEmail = async (req, res) => {
       return sendFailure(
         res,
         400,
-        `Invalid OTP you have ${remaining} trials remaining`
+        `Invalid OTP you have ${remaining} trial(s) remaining`
       );
     }
     user.isEmailVerified = true;
@@ -130,6 +133,15 @@ const activateEmail = async (req, res) => {
   }
 };
 
+/**
+ * @description Resend OTP to user email address for verification purposes
+ * @route POST /api/v1/resend-otp
+ * @access Private
+ * @type {import('express').RequestHandler}
+ * @param {import('express').Request} req default request object
+ * @param {import('express').Response} res default response object
+ * @returns {Promise<void>}
+ */
 const resendOTP = async (req, res) => {
   try {
     const { email } = req.body;
@@ -161,6 +173,70 @@ const resendOTP = async (req, res) => {
     return sendFailure(res, 500, "An error occured");
   }
 };
+
+const sendPasswordResetOTP = async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) return sendFailure(res, 400, "User not found");
+    const otp = generateOtp(6);
+    const salt = generateSalt(10);
+    const otpData = {
+      userId: user._id,
+      hashedOtp: bcrypt.hashSync(String(otp), salt),
+      purpose: "passwordReset",
+      expiredAt: moment().add(5, "minutes"),
+    };
+
+    const value = await createOTPQuery(otpData);
+    const emailData = { email: user.email, otp };
+    try {
+      await verifyPasswordResetEmail(emailData);
+    } catch (err) {
+      console.error("Failed to send verification email:", err);
+    }
+    return sendSuccess(res, 200, "OTP sent successfully");
+  } catch (error) {
+    console.error(error);
+    return sendFailure(res, 500, "An error occured");
+  }
+};
+
+const verifyPasswordResetOTP = async (req, res) => {
+  try {
+    const { otp } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user.isEmailVerified)
+      return sendFailure(res, 403, "Please Verify your email");
+    if (!user) return sendFailure(res, 400, "User not Found");
+    const data = { userId: user._id, purpose: "passwordReset" };
+    const otpObject = await findOTPQuery(data);
+    if (!otpObject) return sendFailure(res, 400, "No otp Found");
+    if (moment().isAfter(otpObject.expiredAt))
+      return sendFailure(res, 400, "OTP has expired, request for a new one");
+    const isMatch = bcrypt.compareSync(otp, otpObject.hashedOtp);
+    if (!isMatch) {
+      otpObject.remainingUsage -= 1;
+      otpObject.save();
+      return sendFailure(
+        res,
+        400,
+        `Invalid OTP, you have ${otpObject.remainingUsage} trial(s) remaining`
+      );
+    }
+    user.isPasswordReset = true;
+    user.isPasswordResetExpiredAt = moment().add(5, "minutes");
+    user.save();
+    return sendSuccess(res, 200, "OTP verified successfully");
+  } catch (error) {
+    console.error(error);
+  }
+  return sendFailure(res, 500, "An error occured");
+};
+
+const passwordRest = async (req, res) => {
+        
+}
 
 /**
  * @description Login user
@@ -198,4 +274,12 @@ const login = async (req, res) => {
   }
 };
 
-module.exports = { register, login, activateEmail, resendOTP };
+module.exports = {
+  register,
+  login,
+  activateEmail,
+  resendOTP,
+  sendPasswordResetOTP,
+  verifyPasswordResetOTP,
+  passwordReset
+};
