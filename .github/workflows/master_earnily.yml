@@ -67,3 +67,8 @@ jobs:
           app-name: "earnily"
           slot-name: "Production"
           package: .
+
+      - name: "Install PM2 and start the app"
+        run: |
+          npm install pm2 -g
+          pm2-runtime start ecosystem.config.js --env production
