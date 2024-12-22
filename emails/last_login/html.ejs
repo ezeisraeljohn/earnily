@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title><%= 'Earnily: New Login Detected' %></title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        -webkit-font-smoothing: antialiased;
+        font-family: sans-serif;
+        font-size: 14px;
+        line-height: 100%;
+        -ms-text-size-adjust: 100%;
+        -webkit-text-size-adjust: 100%;
+        color: black;
+      }
+      table {
+        width: 100%;
+        border: none;
+        border-collapse: separate;
+        mso-table-lspace: 0pt;
+        mso-table-rspace: 0pt;
+      }
+      table tr td {
+        padding: 20px;
+        text-align: center;
+      }
+    </style>
+  </head>
+
+  <body>
+    <table>
+        <tr>
+             <td>
+                  <img
+                    src="<%= loginInfo.img %>" 
+                    alt="Earnily Logo"
+                    style="width: 50px; height: auto"
+                  />
+                </td>
+              </tr>
+      <tr>
+        <td>
+          <h1><%= 'New Login Detected' %></h1>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <p>
+            Device: 
+            <%= loginInfo.lastLoginInfo.device || 'Unknown Device' %>, 
+            <%= loginInfo.lastLoginInfo.os || 'Unknown OS' %>, 
+            <%= loginInfo.lastLoginInfo.browser || 'Unknown Browser' %><br />
+            
+            Location: 
+            <%= loginInfo.lastLoginInfo.location.city || 'Unknown City' %>, 
+            <%= loginInfo.lastLoginInfo.location.region || 'Unknown Region' %>, 
+            <%= loginInfo.lastLoginInfo.location.country || 'Unknown Country' %> <br />
+
+            IP Address: <%= loginInfo.ipAddress || 'Unknown IP' %> <br />
+
+            <% if (loginInfo.isNewDevice) { %> 
+              <p>This is a new Device</p> 
+            <% } %>
+
+            <% if (loginInfo.isNewLocation) { %> 
+              <p>This is a new Location</p> 
+            <% } %>
+            
+          </p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
