@@ -13,6 +13,7 @@ const verifyEmail = (emailData) => {
     locals: {
       locale: "en",
       otp: emailData.otp,
+      img: emailData.img,
     },
   }).catch((err) => {
     console.error(err);
@@ -31,6 +32,7 @@ const verifyPasswordResetEmail = (emailData) => {
     locals: {
       locale: "en",
       otp: emailData.otp,
+      img: emailData.img,
     },
   }).catch((err) => {
     console.error(err);
@@ -38,4 +40,22 @@ const verifyPasswordResetEmail = (emailData) => {
   console.log("Email sent");
 };
 
-module.exports = { verifyEmail, verifyPasswordResetEmail };
+const sendLastLoginInfo = (emailData) => {
+  NodeMailer.send({
+    template: "last_login",
+    message: {
+      from: `${process.env.MAIL_FROM_NAME} <${process.env.MAIL_FROM_ADDRESS}>`,
+      to: emailData.email,
+      subject: `${emailHeader}: New Login Detected`,
+    },
+    locals: {
+      locale: "en",
+      loginInfo: emailData,
+    },
+  }).catch((err) => {
+    console.error(err);
+  });
+  console.log("Email sent");
+};
+
+module.exports = { verifyEmail, verifyPasswordResetEmail, sendLastLoginInfo };
