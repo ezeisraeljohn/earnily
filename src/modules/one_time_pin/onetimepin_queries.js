@@ -13,7 +13,6 @@ const createOTPQuery = async (data) => {
 const findOTPQuery = async (data) => {
   try {
     const otp = await OTP.findOne().sort({ createdAt: -1 });
-    console.log(otp);
     return otp;
   } catch (err) {
     console.error(err);

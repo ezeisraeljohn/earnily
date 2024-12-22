@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema(
     isActive: { type: Boolean, default: true },
     profilePicture: { type: String, required: false },
     isEmailVerified: { type: Boolean, default: false },
-    emailVerificationToken: { type: String, required: false },
     emailVerifiedAt: { type: Date, required: false },
     isAdmin: { type: Boolean, required: false, default: false },
     isPasswordReset: { type: Boolean, required: false, default: false },

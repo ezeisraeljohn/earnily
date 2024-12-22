@@ -1,4 +1,5 @@
 const User = require("../../../models/user_model");
+const Login = require("../../../models/login_model");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
@@ -7,6 +8,8 @@ const {
   generateOtp,
   generateToken,
   generateSalt,
+  getIPAddress,
+  getDeviceAndLocation,
 } = require("../../../shared/utils/helpers");
 const {
   createOTPQuery,
@@ -15,6 +18,7 @@ const {
 const {
   verifyEmail,
   verifyPasswordResetEmail,
+  sendLastLoginInfo,
 } = require("../../generic/email_service");
 const moment = require("moment");
 dotenv.config();
@@ -159,7 +163,11 @@ const resendOTP = async (req, res) => {
       expiredAt: moment().add(5, "minutes"),
     };
     const value = await createOTPQuery(otpData);
-    const emailData = { email: user.email, otp };
+    const emailData = {
+      email: user.email,
+      otp,
+      img: process.env.EARNILY_LOGO_URL,
+    };
     try {
       await verifyEmail(emailData);
     } catch (err) {
@@ -189,7 +197,11 @@ const sendPasswordResetOTP = async (req, res) => {
     };
 
     const value = await createOTPQuery(otpData);
-    const emailData = { email: user.email, otp };
+    const emailData = {
+      email: user.email,
+      otp,
+      img: process.env.EARNILY_LOGO_URL,
+    };
     try {
       await verifyPasswordResetEmail(emailData);
     } catch (err) {
@@ -284,12 +296,65 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
+    const login = await Login.findOne({ userId: user.id })?.sort({
+      createdAt: -1,
+    });
+    const ipAddress = getIPAddress(req);
+    const lastLoginInfo = await getDeviceAndLocation(req);
     if (!user) sendFailure(res, 400, "Invalid Credentials");
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) sendFailure(res, 400, "Invalid Credentials");
+    if (!login) {
+      const loginData = {
+        userId: user.id,
+        lastLoginInfo,
+        ipAddress,
+      };
+      const newLogin = new Login({ ...loginData });
+      await newLogin.save();
+    } else {
+      if (ipAddress !== login.ipAddress) {
+        let isNewDevice = false;
+        let isNewLocation = false;
+        if (
+          lastLoginInfo.device !== login.lastLoginInfo.device ||
+          lastLoginInfo.os !== login.lastLoginInfo.os ||
+          lastLoginInfo.browser !== login.lastLoginInfo.browser
+        )
+          isNewDevice = true;
 
+        if (
+          lastLoginInfo.location.city !== login.lastLoginInfo.location.city ||
+          lastLoginInfo.location.region !==
+            login.lastLoginInfo.location.region ||
+          lastLoginInfo.location.country !==
+            login.lastLoginInfo.location.country
+        )
+          isNewLocation = true;
+
+        if (isNewDevice || isNewLocation) {
+          const emailData = {
+            lastLoginInfo,
+            ipAddress,
+            isNewDevice,
+            isNewLocation,
+            email: user.email,
+            img: process.env.EARNILY_LOGO_URL,
+          };
+          const value = sendLastLoginInfo(emailData);
+        }
+        const loginData = {
+          userId: user.id,
+          lastLoginInfo,
+          ipAddress,
+        };
+        const newLogin = new Login({ ...loginData });
+        await newLogin.save();
+      }
+    }
     const payload = { userId: user._id, email: user.email, role: user.role };
     const token = generateToken(payload);
+
     const {
       password: password1,
       __v,
