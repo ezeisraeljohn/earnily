@@ -23,12 +23,26 @@ const applicationSchema = new moongose.Schema(
     },
     status: {
       type: String,
-      enum: ["applied", "reviewing", "accepted", "rejected"],
+      enum: ["applied", "reviewing", "accepted", "rejected", "completed"],
       default: "applied",
     },
     dateApplied: {
       type: Date,
       default: Date.now,
+    },
+    feedback: {
+      type: String, // Feedback text from employer/recruiter
+      required: false,
+    },
+    attachments: [
+      {
+        fileUrl: { type: String, required: false },
+        fileName: { type: String, required: false },
+      },
+    ],
+    feedback: {
+      type: String, // Feedback text from employer/recruiter
+      required: false,
     },
   },
   {
