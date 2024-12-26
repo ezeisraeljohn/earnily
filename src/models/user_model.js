@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
     isPasswordResetExpiredAt: { type: Date, required: false },
     company: {
       type: mongoose.Schema.ObjectId,
-      ref: "Company", // Reference to the Company model
+      ref: "Company", 
       required: false, // Company is optional during registration
     },
   },
