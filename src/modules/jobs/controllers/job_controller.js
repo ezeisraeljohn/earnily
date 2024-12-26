@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const { sendSuccess, sendFailure } = require("../../../shared/utils/responses");
+const User = require("../../../models/user_model");
 
 const Job = require("../../../models/job_model");
 
@@ -12,6 +13,10 @@ const Job = require("../../../models/job_model");
  * @returns {Promise<void>}
  */
 const createJob = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const company = user.company.toString();
+  if (!company)
+    return sendFailure(res, 200, "Please create a company to post Jobs");
   try {
     const {
       title,
