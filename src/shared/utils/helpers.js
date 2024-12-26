@@ -1,10 +1,39 @@
 const jwt = require("jsonwebtoken");
 const UAParser = require("ua-parser-js");
 const bcrypt = require("bcryptjs");
-const generateOtp = (num) =>
-  Math.floor(
-    Math.random() * (9 * Math.pow(10, num - 1)) + Math.pow(10, num - 1)
-  );
+const { BlobServiceClient } = require("@azure/storage-blob");
+const { v4: uuidv4 } = require("uuid");
+
+const AZURE_STORAGE_CONNECTION_STRING =
+  process.env.AZURE_STORAGE_CONNECTION_STRING;
+
+const blobServiceClient = BlobServiceClient.fromConnectionString(
+  AZURE_STORAGE_CONNECTION_STRING
+);
+
+const uploadFileToAzure = async (file, containerName) => {
+  const containerClient = blobServiceClient.getContainerClient(containerName);
+  const exists = await containerClient.exists();
+  if (!exists) {
+    await containerClient.create();
+  }
+  const blobName = `${uuidv4()}-${file.originalname}`;
+  const blockBlobClient = containerClient.getBlockBlobClient(blobName);
+
+  await blockBlobClient.uploadData(file.buffer, {
+    blobHTTPHeaders: { blobContentType: file.mimetype },
+  });
+  return blockBlobClient.url;
+};
+const generateOtp = (num) => {
+  if (process.env.NODE_ENV === "development") {
+    return 100000;
+  } else {
+    return Math.floor(
+      Math.random() * (9 * Math.pow(10, num - 1)) + Math.pow(10, num - 1)
+    );
+  }
+};
 
 const generateToken = (payload) => {
   const token = jwt.sign(payload, process.env.SECRET, { expiresIn: "2d" });
@@ -60,4 +89,5 @@ module.exports = {
   generateSalt,
   getIPAddress,
   getDeviceAndLocation,
+  uploadFileToAzure,
 };

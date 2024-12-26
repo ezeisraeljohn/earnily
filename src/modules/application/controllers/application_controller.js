@@ -1,6 +1,6 @@
 const Application = require("../../../models/application_model");
 const Job = require("../../../models/job_model");
-const { uploadFileToAzure } = require("../middlewares/upload_middleware");
+const { uploadFileToAzure } = require("../../../shared/utils/helpers");
 const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
 
 /**
@@ -11,7 +11,7 @@ const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
  */
 const applyForJobs = async (req, res) => {
   const { coverLetter, resume } = req.body;
-  const { jobId } = req.path;
+  const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId);
     if (!job) sendFailure(res, 404, "Job not found");
@@ -21,22 +21,32 @@ const applyForJobs = async (req, res) => {
       applicant: req.user.id,
       job: jobId,
     });
-    sendFailure(res, 400, "You have already applied for this job");
+    if (existingApplication)
+      sendFailure(res, 400, "You have already applied for this job");
     // Resume file required
     if (!req.files || !req.files.resume) {
-      sendFailure(res, 400, "Resume is required");
+      return sendFailure(res, 400, "Resume is required");
     }
-    const resumeFileUrl = await uploadFileToAzure(req.files.resume[0]);
+    const containerName = "resumes";
+    const resumeFileUrl = await uploadFileToAzure(
+      req.files.resume[0],
+      containerName
+    );
     const application = await Application.create({
       job: jobId,
       applicant: req.user.id,
       resume: resumeFileUrl,
       coverLetter,
     });
-    sendSuccess(res, 201, "Application submitted successfully", application);
+    return sendSuccess(
+      res,
+      201,
+      "Application submitted successfully",
+      application
+    );
   } catch (error) {
     console.log(error);
-    sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Server Error");
   }
 };
 
@@ -51,15 +61,20 @@ const getApplicationsForJob = async (req, res) => {
     const job = await Job.findById(req.params.jobId);
     if (!job) sendFailure(res, 404, "Job not found");
     if (job.postedBy.toString() !== req.user.id) {
-      sendFailure(res, 401, "Unauthorized Access");
+      return sendFailure(res, 401, "Unauthorized Access");
     }
     const applications = await Application.find({
       job: req.params.jobId,
     }).populate("applicant", "firstName lastName email");
-    sendSuccess(res, 200, "Applications retrieved successfully", applications);
+    return sendSuccess(
+      res,
+      200,
+      "Applications retrieved successfully",
+      applications
+    );
   } catch (error) {
     console.log(eror);
-    sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Server Error");
   }
 };
 
