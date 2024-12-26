@@ -3,7 +3,10 @@ const mongoose = require("mongoose");
 const jobSchema = new mongoose.Schema(
   {
     title: { type: String, required: [true, "Please provide a title"] },
-    company: { type: String, requrired: [true, "Please provide a company"] },
+    company: {
+      type: mongoose.ObjectId,
+      requrired: [true, "Please provide a company"],
+    },
     location: { type: String, required: [true, "Please provide a location"] },
     salaryMin: { type: Number, required: [true, "Please provide a salary"] },
     salaryMax: { type: Number, required: [true, "Please provide a salary"] },
