@@ -13,6 +13,10 @@ const blobServiceClient = BlobServiceClient.fromConnectionString(
 
 const uploadFileToAzure = async (file, containerName) => {
   const containerClient = blobServiceClient.getContainerClient(containerName);
+  const exists = await containerClient.exists();
+  if (!exists) {
+    await containerClient.create();
+  }
   const blobName = `${uuidv4()}-${file.originalname}`;
   const blockBlobClient = containerClient.getBlockBlobClient(blobName);
 
