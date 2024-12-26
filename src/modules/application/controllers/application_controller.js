@@ -10,7 +10,7 @@ const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
  * @returns {Promise<void>}
  */
 const applyForJobs = async (req, res) => {
-  const { coverLetter, resume } = req.body;
+  const { coverLetter, resume, attachments } = req.body;
   const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId);
