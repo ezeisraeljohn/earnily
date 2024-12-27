@@ -14,6 +14,8 @@ const createCompany = async (req, res) => {
       return sendFailure(res, 404, "User not found");
     }
     const logoUrl = await uploadFileToAzure(req.files.logo[0], "logos");
+    if (user.company)
+      return sendFailure(res, 400, "User already has a company");
     const company = await Company.create({
       name,
       description,
@@ -82,6 +84,7 @@ const deleteCompany = async (req, res) => {
   try {
     const { companyId } = req.params;
     const company = await Company.findById(companyId);
+    if (!company) return sendFailure(res, 404, "Company not found");
     if (company.createdBy.toString() !== req.user.id)
       return sendFailure(res, 401, "Unauthorized access");
     await Company.findByIdAndDelete(companyId);

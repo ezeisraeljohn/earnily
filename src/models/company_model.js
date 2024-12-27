@@ -29,6 +29,7 @@ const companySchema = new mongoose.Schema(
       type: Date,
       default: Date.now,
     },
+    reviews: [{ type: mongoose.Schema.ObjectId, ref: "ReviewCompany" }],
   },
   { timestamps: true }
 );

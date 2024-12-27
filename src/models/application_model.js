@@ -40,6 +40,13 @@ const applicationSchema = new moongose.Schema(
         fileName: { type: String, required: false },
       },
     ],
+    reviews: [
+      {
+        type: moongose.Schema.ObjectId,
+        ref: "JobReview",
+        required: false,
+      },
+    ],
   },
   {
     timestamps: true,

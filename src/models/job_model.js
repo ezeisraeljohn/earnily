@@ -23,6 +23,12 @@ const jobSchema = new mongoose.Schema(
       required: [true, "Please provide a user (only employers can post jobs)"],
     },
     datePosted: { type: Date, default: Date.now },
+    reviews: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: "ReviewJob",
+      },
+    ],
   },
   {
     timestamps: true,
