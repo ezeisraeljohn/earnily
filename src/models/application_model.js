@@ -40,10 +40,6 @@ const applicationSchema = new moongose.Schema(
         fileName: { type: String, required: false },
       },
     ],
-    feedback: {
-      type: String, // Feedback text from employer/recruiter
-      required: false,
-    },
   },
   {
     timestamps: true,
