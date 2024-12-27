@@ -17,7 +17,7 @@ router.post(
   "/job/:jobId/apply",
   protect,
   authorize(["jobseeker"]),
-  uploadDocs.fields([{ name: "resume", maxCount: 1 }]),
+  uploadDocs.fields([{ name: "resume", maxCount: 1 }, { name: "attachments" }]),
   applyForJobs
 );
 router.get(

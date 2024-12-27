@@ -19,8 +19,7 @@ const protect = async (req, res, next) => {
     if (!token) return sendSuccess(res, 401, "Invalid Token");
     const decoded = jwt.verify(token, process.env.SECRET);
     req.user = await User.findById(decoded.userId);
-    if (!req.user)
-      return sendFailure(res, 401, "Invalid token or token has expired");
+    if (!req.user) return sendFailure(res, 401, "User not Found");
     next();
   } catch (error) {
     console.error(error);

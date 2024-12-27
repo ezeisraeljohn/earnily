@@ -10,7 +10,7 @@ const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
  * @returns {Promise<void>}
  */
 const applyForJobs = async (req, res) => {
-  const { coverLetter, resume } = req.body;
+  const { coverLetter } = req.body;
   const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId);
@@ -27,16 +27,30 @@ const applyForJobs = async (req, res) => {
     if (!req.files || !req.files.resume) {
       return sendFailure(res, 400, "Resume is required");
     }
+    const attachments = Promise.all(
+      req.files.attachments.map(async (attachment) => {
+        const attachmentUrl = await uploadFileToAzure(
+          attachment,
+          "attachments"
+        );
+        return {
+          fileUrl: attachmentUrl,
+          fileName: attachment.originalname,
+        };
+      })
+    );
     const containerName = "resumes";
     const resumeFileUrl = await uploadFileToAzure(
       req.files.resume[0],
       containerName
     );
+
     const application = await Application.create({
       job: jobId,
       applicant: req.user.id,
       resume: resumeFileUrl,
       coverLetter,
+      attachments: await attachments,
     });
     return sendSuccess(
       res,
@@ -46,7 +60,7 @@ const applyForJobs = async (req, res) => {
     );
   } catch (error) {
     console.log(error);
-    return sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Opps something went wrong");
   }
 };
 
@@ -74,7 +88,7 @@ const getApplicationsForJob = async (req, res) => {
     );
   } catch (error) {
     console.log(eror);
-    return sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Opps something went wrong");
   }
 };
 
@@ -117,7 +131,7 @@ const updateApplication = async (req, res) => {
     sendSuccess(res, 200, "Application updated successfully", application);
   } catch (error) {
     console.log(error);
-    sendFailure(res, 500, "Server Error");
+    sendFailure(res, 500, "Oops something went wrong");
   }
 };
 module.exports = {
