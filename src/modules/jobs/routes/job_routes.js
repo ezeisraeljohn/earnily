@@ -14,8 +14,8 @@ const router = require("express").Router();
 
 router.post("", protect, authorize(["employer"]), createJob);
 router.put("/:id", protect, authorize(["employer"]), updateJob);
-router.delete("/jobs/:id", protect, authorize(["employer"]), deleteJob);
+router.delete("/:id", protect, authorize(["employer"]), deleteJob);
 router.get("/me", protect, authorize(["employer"]), getMyJobs);
-router.get("/:id", protect, authorize(["employer"]), getJob);
+router.get("/:id", protect, authorize(["employer", "jobseeker"]), getJob);
 router.get("", getJobs);
 module.exports = router;
