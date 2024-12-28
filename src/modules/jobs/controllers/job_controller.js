@@ -185,9 +185,7 @@ const getJob = async (req, res) => {
     }
     const job = await Job.findById(req.params.id);
     if (!job) sendFailure(res, 404, "Job not found");
-    if (job.postedBy.toString() !== req.user.id) {
-      sendFailure(res, 401, "You are not authorized to view this job");
-    }
+
     const new_job = job.toObject();
     new_job.id = new_job._id;
     delete new_job._id;
