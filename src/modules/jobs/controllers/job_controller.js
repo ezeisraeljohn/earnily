@@ -14,7 +14,7 @@ const Job = require("../../../models/job_model");
  */
 const createJob = async (req, res) => {
   const user = await User.findById(req.user.id);
-  const company = user.company.toString();
+  const company = user.company?.toString();
   if (!company)
     return sendFailure(res, 200, "Please create a company to post Jobs");
   try {
