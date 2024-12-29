@@ -5,6 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "pm2-runtime start ecosystem.config.js --env production",
+    "seed:categories:dev": "NODE_ENV=development node src/seeders/seed_categories.js",
+    "seed:skills:dev": "NODE_ENV=development node src/seeders/seed_skills.js",
+    "seed": "NODE_ENV=development node src/seeders/index.js",
     "test": "NODE_ENV=test jest --detectOpenHandles --coverage",
     "lint": "./node_modules/.bin/eslint",
     "check-lint": "lint [0-9]*.js",
