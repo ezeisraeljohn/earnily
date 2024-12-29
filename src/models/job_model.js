@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Category = require("./categories_model");
 
 const jobSchema = new mongoose.Schema(
   {
@@ -10,7 +11,6 @@ const jobSchema = new mongoose.Schema(
     location: { type: String, required: [true, "Please provide a location"] },
     salaryMin: { type: Number, required: [true, "Please provide a salary"] },
     salaryMax: { type: Number, required: [true, "Please provide a salary"] },
-    jobCategory: { type: mongoose.Schema.ObjectId, required: true },
     description: { type: String },
     jobType: {
       type: String,
@@ -23,11 +23,10 @@ const jobSchema = new mongoose.Schema(
       ref: "User",
       required: [true, "Please provide a user (only employers can post jobs)"],
     },
-    jobCategory: {
+    category: {
       type: mongoose.Schema.ObjectId,
-      ref: "JobCategory",
-      required: [true, "Please provide a job category"],
-      max: 1,
+      ref: "Category",
+      required: [false, "Please provide a job category"],
     },
     skills: [{ type: mongoose.Schema.ObjectId, ref: "Skill", required: true }],
     experienceLevel: {
@@ -57,6 +56,18 @@ const jobSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+jobSchema.pre("save", async function (next) {
+  if (!this.category) {
+    const othersCategory = await Category.findOne({ name: "Others" });
+
+    if (othersCategory) {
+      this.category = othersCategory._id;
+    } else {
+      throw new Error('"Others" category not found in database.');
+    }
+  }
+  next();
+});
 
 const Job = mongoose.model("Job", jobSchema);
 module.exports = Job;
