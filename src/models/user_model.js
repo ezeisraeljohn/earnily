@@ -21,6 +21,7 @@ const userSchema = new mongoose.Schema(
       ref: "Company",
       required: false, // Company is optional during registration
     },
+    reviews: [{ type: mongoose.Schema.ObjectId, ref: "UserReview" }],
   },
   { timestamps: true }
 );
