@@ -41,6 +41,15 @@ const getUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { firstName, lastName, profilePicture, skills, categories } =
+      req.body;
+    const updateBody = {
+      firstName,
+      lastName,
+      profilePicture,
+      skills,
+      categories,
+    };
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return sendFailure(res, 400, "Invalid user id");
     }
@@ -57,7 +66,7 @@ const updateUser = async (req, res) => {
         );
       }
     }
-    const updatedUser = await User.findByIdAndUpdate(userId, req.body, {
+    const updatedUser = await User.findByIdAndUpdate(userId, updateBody, {
       new: true,
       runValidators: true,
       lean: true,
