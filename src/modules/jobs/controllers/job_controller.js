@@ -43,8 +43,8 @@ const createJob = async (req, res) => {
     delete jobWithoutV._id;
     sendSuccess(res, 201, "Job created successfully", jobWithoutV);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: error.message });
+    console.error(error);
+    sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -185,7 +185,6 @@ const getJob = async (req, res) => {
     }
     const job = await Job.findById(req.params.id);
     if (!job) sendFailure(res, 404, "Job not found");
-
     const new_job = job.toObject();
     new_job.id = new_job._id;
     delete new_job._id;
