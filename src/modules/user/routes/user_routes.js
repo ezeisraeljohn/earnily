@@ -3,7 +3,7 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/user_controller");
-
+const { uploadProfilePicture } = require("../middleware/upload_middleware");
 const {
   protect,
   authorize,
@@ -15,6 +15,7 @@ router.put(
   "/:userId",
   protect,
   authorize(["employer", "jobseeker"]),
+  uploadProfilePicture.fields([{ name: "profilePicture", maxCount: 1 }]),
   updateUser
 );
 router.delete(
