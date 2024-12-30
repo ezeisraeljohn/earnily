@@ -10,6 +10,7 @@ const ReviewCompanyRouter = require("./src/modules/reviews/company_review/routes
 const savedJobsRouter = require("./src/modules/saved_jobs/routes/saved_jobs_route");
 const categoryRouter = require("./src/modules/categories/routes/categories_route");
 const skillRouter = require("./src/modules/skills/routes/skill_route");
+const userReviewRouter = require("./src/modules/reviews/user_review/routers/user_review_routes");
 const path = require("path");
 const cors = require("cors");
 const rateLimiter = require("./src/shared/utils/ratelimiting");
@@ -24,7 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 app.use(rateLimiter);
 app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
-app.use("/api/v1/user", userRouter);
+app.use("/api/v1/user", userRouter, userReviewRouter);
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/company", companyRouter, ReviewCompanyRouter);
 app.use("/api/v1", applicationRouter);
