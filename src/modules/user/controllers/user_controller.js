@@ -50,20 +50,26 @@ const updateUser = async (req, res) => {
         "profile-pictures"
       );
     }
+    const user = await User.findById(userId);
     const skillsArray = skills?.split(",");
     const categoriesArray = categories?.split(",");
+    const newSkills = skillsArray.filter(
+      (skill) => !user.skills.includes(skill)
+    );
+    const newCategories = categoriesArray.filter(
+      (category) => !user.categories.includes(category)
+    );
     console.log(profilePictureUrl);
     const updateBody = {
       firstName,
       lastName,
-      profilePicture: profilePictureUrl,
-      skills: skillsArray,
-      categories: categoriesArray,
+      skills: [...user.skills, ...newSkills],
+      categories: [...user.categories, ...newCategories],
     };
+    updateBody.profilePicture = profilePictureUrl || user.profilePicture;
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return sendFailure(res, 400, "Invalid user id");
     }
-    const user = await User.findById(userId);
     if (!user) {
       return sendFailure(res, 404, "User not found");
     }
