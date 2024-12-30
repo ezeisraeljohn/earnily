@@ -16,6 +16,7 @@ const userSchema = new mongoose.Schema(
     isPasswordReset: { type: Boolean, required: false, default: false },
     isPasswordResetExpiredAt: { type: Date, required: false },
     skills: [{ type: mongoose.Schema.ObjectId, ref: "Skill" }],
+    categories: [{ type: mongoose.Schema.ObjectId, ref: "Category" }],
     company: {
       type: mongoose.Schema.ObjectId,
       ref: "Company",
