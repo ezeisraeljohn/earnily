@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { sendSuccess, sendFailure } = require("../../../shared/utils/responses");
 const User = require("../../../models/user_model");
+const { uploadFileToAzure } = require("../../../shared/utils/helpers");
 
 /**
  * @desc Get a user profile
@@ -41,14 +42,23 @@ const getUser = async (req, res) => {
 const updateUser = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { firstName, lastName, profilePicture, skills, categories } =
-      req.body;
+    const { firstName, lastName, skills, categories } = req.body;
+    let profilePictureUrl = null;
+    if (req.files.profilePicture) {
+      profilePictureUrl = await uploadFileToAzure(
+        req.files.profilePicture[0],
+        "profile-pictures"
+      );
+    }
+    const skillsArray = skills?.split(",");
+    const categoriesArray = categories?.split(",");
+    console.log(profilePictureUrl);
     const updateBody = {
       firstName,
       lastName,
-      profilePicture,
-      skills,
-      categories,
+      profilePicture: profilePictureUrl,
+      skills: skillsArray,
+      categories: categoriesArray,
     };
     if (!mongoose.Types.ObjectId.isValid(userId)) {
       return sendFailure(res, 400, "Invalid user id");
@@ -76,7 +86,7 @@ const updateUser = async (req, res) => {
     sendSuccess(res, 200, "User updated successfully", userWithoutPassword);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ msg: error.message });
+    sendFailure(res, 500, "Oops an Error Occured");
   }
 };
 
