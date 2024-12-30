@@ -26,6 +26,7 @@ const createJob = async (req, res) => {
       salaryMin,
       salaryMax,
       company,
+      isDraft,
     } = req.body;
     const job = new Job({
       title,
@@ -34,6 +35,7 @@ const createJob = async (req, res) => {
       salaryMin,
       salaryMax,
       company,
+      isDraft,
       jobType,
       postedBy: req.user.id,
     });
@@ -60,6 +62,7 @@ const updateJob = async (req, res) => {
   try {
     let job = await Job.findById(req.params.id);
     if (!job) sendFailure(res, 404, "Job not found");
+    if (!job.isDraft) sendFailure(res, 400, "You can only update draft jobs");
     if (job.postedBy.toString() !== req.user.id) {
       sendFailure(res, 401, "You are not authorized to update this job");
     }

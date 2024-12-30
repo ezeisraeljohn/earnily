@@ -39,6 +39,7 @@ const jobSchema = new mongoose.Schema(
       type: String,
       enum: ["short-term", "long-term", "permanent"],
     },
+    isDraft: { type: Boolean, default: false },
     datePosted: { type: Date, default: Date.now },
     status: { type: String, enum: ["active", "closed"], default: "active" },
     expiryDate: {
