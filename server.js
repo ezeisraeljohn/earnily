@@ -9,6 +9,7 @@ const ReviewJobRouter = require("./src/modules/reviews/job_reviews/routes/job_re
 const ReviewCompanyRouter = require("./src/modules/reviews/company_review/routes/company_review_routes");
 const savedJobsRouter = require("./src/modules/saved_jobs/routes/saved_jobs_route");
 const categoryRouter = require("./src/modules/categories/routes/categories_route");
+const suggestSkillRouter = require("./src/modules/suggest_skills/routers/suggest_skills_route");
 const skillRouter = require("./src/modules/skills/routes/skill_route");
 const userReviewRouter = require("./src/modules/reviews/user_review/routers/user_review_routes");
 const path = require("path");
@@ -32,7 +33,7 @@ app.use("/api/v1", applicationRouter);
 app.use("/api/v1/jobs", jobsRouter, ReviewJobRouter);
 app.use("/api/v1/saved-jobs", savedJobsRouter);
 app.use("/api/v1/job-categories", categoryRouter);
-app.use("/api/v1/skills", skillRouter);
+app.use("/api/v1/skills", skillRouter, suggestSkillRouter);
 const PORT = process.env.PORT || 8080;
 if (process.env.NODE_ENV !== "test") {
   app.listen(PORT, () => {
