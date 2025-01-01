@@ -27,7 +27,7 @@ const getUser = async (req, res) => {
     sendSuccess(res, 200, "User retrieved successfully", userWithoutPassword);
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: error.message });
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -59,7 +59,6 @@ const updateUser = async (req, res) => {
     const newCategories = categoriesArray.filter(
       (category) => !user.categories.includes(category)
     );
-    console.log(profilePictureUrl);
     const updateBody = {
       firstName,
       lastName,
@@ -127,7 +126,7 @@ const deleteUser = async (req, res) => {
     sendSuccess(res, 200, "User deleted successfully");
   } catch (error) {
     console.error(error.message);
-    res.status(500).json({ msg: error.message });
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
