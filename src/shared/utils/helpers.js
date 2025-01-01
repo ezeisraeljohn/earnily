@@ -3,6 +3,9 @@ const UAParser = require("ua-parser-js");
 const bcrypt = require("bcryptjs");
 const { BlobServiceClient } = require("@azure/storage-blob");
 const { v4: uuidv4 } = require("uuid");
+const dotenv = require("dotenv");
+
+dotenv.config();
 
 const AZURE_STORAGE_CONNECTION_STRING =
   process.env.AZURE_STORAGE_CONNECTION_STRING;
