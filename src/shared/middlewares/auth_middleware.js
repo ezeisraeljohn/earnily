@@ -19,8 +19,7 @@ const protect = async (req, res, next) => {
     if (!token) return sendSuccess(res, 401, "Invalid Token");
     const decoded = jwt.verify(token, process.env.SECRET);
     req.user = await User.findById(decoded.userId);
-    if (!req.user)
-      return sendFailure(res, 401, "Invalid token or token has expired");
+    if (!req.user) return sendFailure(res, 401, "User not Found");
     next();
   } catch (error) {
     console.error(error);
@@ -34,11 +33,13 @@ const protect = async (req, res, next) => {
  * @returns
  */
 const authorize = (role) => (req, res, next) => {
-  if (req.user.role !== role && !req.user.isAdmin)
+  if (!role.includes(req.user.role) && !req.user.isAdmin)
     return sendFailure(res, 403, "You are not authorized to access this route");
 
   if (!req.user.isEmailVerified)
     return sendFailure(res, 403, "Please Verify Your Email");
+
+  if (!req.user.isActive) return sendFailure(res, 403, "Account not found");
   next();
 };
 

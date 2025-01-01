@@ -12,10 +12,10 @@ const {
 } = require("../../../shared/middlewares/auth_middleware");
 const router = require("express").Router();
 
-router.post("/jobs", protect, authorize("employer"), createJob);
-router.put("/jobs/:id", protect, authorize("employer"), updateJob);
-router.delete("/jobs/:id", protect, authorize("employer"), deleteJob);
-router.get("/jobs/me", protect, authorize("employer"), getMyJobs);
-router.get("/job/:id", protect, authorize("employer"), getJob);
-router.get("/jobs", getJobs);
+router.post("", protect, authorize(["employer"]), createJob);
+router.put("/:id", protect, authorize(["employer"]), updateJob);
+router.delete("/:id", protect, authorize(["employer"]), deleteJob);
+router.get("/me", protect, authorize(["employer"]), getMyJobs);
+router.get("/:id", protect, authorize(["employer", "jobseeker"]), getJob);
+router.get("", getJobs);
 module.exports = router;

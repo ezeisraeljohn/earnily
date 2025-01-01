@@ -9,28 +9,28 @@ const {
   protect,
   authorize,
 } = require("../../../shared/middlewares/auth_middleware");
-const { upload } = require("../middlewares/upload_middleware");
+const { uploadDocs } = require("../middlewares/upload_middleware");
 
 const router = express.Router();
 
 router.post(
   "/job/:jobId/apply",
   protect,
-  authorize("jobseeker"),
-  upload.fields([{ name: "resume", maxCount: 1 }]),
+  authorize(["jobseeker"]),
+  uploadDocs.fields([{ name: "resume", maxCount: 1 }, { name: "attachments" }]),
   applyForJobs
 );
 router.get(
   "/job/:jobId/applications",
   protect,
-  authorize("employer"),
+  authorize(["employer"]),
   getApplicationsForJob
 );
-router.get("/applications", protect, authorize("jobseeker"), getApplications);
+router.get("/applications", protect, authorize(["jobseeker"]), getApplications);
 router.put(
   "/applications/:id",
   protect,
-  authorize("employer"),
+  authorize(["employer"]),
   updateApplication
 );
 

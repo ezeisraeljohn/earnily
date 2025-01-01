@@ -1,6 +1,6 @@
 const Application = require("../../../models/application_model");
 const Job = require("../../../models/job_model");
-const { uploadFileToAzure } = require("../middlewares/upload_middleware");
+const { uploadFileToAzure } = require("../../../shared/utils/helpers");
 const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
 
 /**
@@ -10,8 +10,8 @@ const { sendFailure, sendSuccess } = require("../../../shared/utils/responses");
  * @returns {Promise<void>}
  */
 const applyForJobs = async (req, res) => {
-  const { coverLetter, resume } = req.body;
-  const { jobId } = req.path;
+  const { coverLetter } = req.body;
+  const { jobId } = req.params;
   try {
     const job = await Job.findById(jobId);
     if (!job) sendFailure(res, 404, "Job not found");
@@ -21,22 +21,46 @@ const applyForJobs = async (req, res) => {
       applicant: req.user.id,
       job: jobId,
     });
-    sendFailure(res, 400, "You have already applied for this job");
+    if (existingApplication)
+      sendFailure(res, 400, "You have already applied for this job");
     // Resume file required
     if (!req.files || !req.files.resume) {
-      sendFailure(res, 400, "Resume is required");
+      return sendFailure(res, 400, "Resume is required");
     }
-    const resumeFileUrl = await uploadFileToAzure(req.files.resume[0]);
+    const attachments = Promise.all(
+      req.files.attachments.map(async (attachment) => {
+        const attachmentUrl = await uploadFileToAzure(
+          attachment,
+          "attachments"
+        );
+        return {
+          fileUrl: attachmentUrl,
+          fileName: attachment.originalname,
+        };
+      })
+    );
+    const containerName = "resumes";
+    const resumeFileUrl = await uploadFileToAzure(
+      req.files.resume[0],
+      containerName
+    );
+
     const application = await Application.create({
       job: jobId,
       applicant: req.user.id,
       resume: resumeFileUrl,
       coverLetter,
+      attachments: await attachments,
     });
-    sendSuccess(res, 201, "Application submitted successfully", application);
+    return sendSuccess(
+      res,
+      201,
+      "Application submitted successfully",
+      application
+    );
   } catch (error) {
     console.log(error);
-    sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Opps something went wrong");
   }
 };
 
@@ -51,15 +75,20 @@ const getApplicationsForJob = async (req, res) => {
     const job = await Job.findById(req.params.jobId);
     if (!job) sendFailure(res, 404, "Job not found");
     if (job.postedBy.toString() !== req.user.id) {
-      sendFailure(res, 401, "Unauthorized Access");
+      return sendFailure(res, 401, "Unauthorized Access");
     }
     const applications = await Application.find({
       job: req.params.jobId,
     }).populate("applicant", "firstName lastName email");
-    sendSuccess(res, 200, "Applications retrieved successfully", applications);
+    return sendSuccess(
+      res,
+      200,
+      "Applications retrieved successfully",
+      applications
+    );
   } catch (error) {
     console.log(eror);
-    sendFailure(res, 500, "Server Error");
+    return sendFailure(res, 500, "Opps something went wrong");
   }
 };
 
@@ -102,7 +131,7 @@ const updateApplication = async (req, res) => {
     sendSuccess(res, 200, "Application updated successfully", application);
   } catch (error) {
     console.log(error);
-    sendFailure(res, 500, "Server Error");
+    sendFailure(res, 500, "Oops something went wrong");
   }
 };
 module.exports = {

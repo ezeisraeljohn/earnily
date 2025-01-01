@@ -37,7 +37,7 @@ const otpSalt = generateSalt(10);
  */
 const register = async (req, res) => {
   try {
-    const { firstName, lastName, email, password, role } = req.body;
+    const { firstName, lastName, email, password, role, company } = req.body;
     let user = await User.findOne({ email });
     if (user) return sendFailure(res, 400, "User already exists");
     const salt = generateSalt(10);
@@ -49,6 +49,7 @@ const register = async (req, res) => {
       email,
       password: hashedPassword,
       role, // employer or jobseeker
+      company,
     });
 
     await user.save();
@@ -304,6 +305,7 @@ const login = async (req, res) => {
     if (!user) sendFailure(res, 400, "Invalid Credentials");
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) sendFailure(res, 400, "Invalid Credentials");
+    if (!user.isActive) sendFailure(res, 404, "User not Found");
     if (!login) {
       const loginData = {
         userId: user.id,

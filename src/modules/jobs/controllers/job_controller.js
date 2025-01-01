@@ -1,5 +1,6 @@
 const { default: mongoose } = require("mongoose");
 const { sendSuccess, sendFailure } = require("../../../shared/utils/responses");
+const User = require("../../../models/user_model");
 
 const Job = require("../../../models/job_model");
 
@@ -12,6 +13,10 @@ const Job = require("../../../models/job_model");
  * @returns {Promise<void>}
  */
 const createJob = async (req, res) => {
+  const user = await User.findById(req.user.id);
+  const company = user.company?.toString();
+  if (!company)
+    return sendFailure(res, 200, "Please create a company to post Jobs");
   try {
     const {
       title,
@@ -21,6 +26,7 @@ const createJob = async (req, res) => {
       salaryMin,
       salaryMax,
       company,
+      isDraft,
     } = req.body;
     const job = new Job({
       title,
@@ -29,6 +35,7 @@ const createJob = async (req, res) => {
       salaryMin,
       salaryMax,
       company,
+      isDraft,
       jobType,
       postedBy: req.user.id,
     });
@@ -38,8 +45,8 @@ const createJob = async (req, res) => {
     delete jobWithoutV._id;
     sendSuccess(res, 201, "Job created successfully", jobWithoutV);
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: error.message });
+    console.error(error);
+    sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -55,20 +62,54 @@ const updateJob = async (req, res) => {
   try {
     let job = await Job.findById(req.params.id);
     if (!job) sendFailure(res, 404, "Job not found");
+    if (!job.isDraft) sendFailure(res, 400, "You can only update draft jobs");
     if (job.postedBy.toString() !== req.user.id) {
       sendFailure(res, 401, "You are not authorized to update this job");
     }
-    job = await Job.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const {
+      title,
+      description,
+      location,
+      jobType,
+      salaryMin,
+      salaryMax,
+      skills,
+      categories,
+      numberOfOpenings,
+      isDraft,
+      status,
+    } = req.body;
+    const updateBody = {
+      title,
+      description,
+      location,
+      jobType,
+      salaryMin,
+      salaryMax,
+      skills,
+      categories,
+      numberOfOpenings,
+      isDraft,
+      status,
+    };
+    const filteredBody = Object.fromEntries(
+      Object.entries(updateBody).filter(([_, value]) => value != null)
+    );
+    job = await Job.findByIdAndUpdate(
+      req.params.id,
+      { ...filteredBody, updatedAt: Date.now },
+      {
+        new: true,
+        runValidators: true,
+      }
+    );
     const { __v: none, ...jobWithoutV } = job.toObject();
     jobWithoutV.id = jobWithoutV._id;
     delete jobWithoutV._id;
-    sendSuccess(res, 200, "Job updated successfully", jobWithoutV);
+    return sendSuccess(res, 200, "Job updated successfully", jobWithoutV);
   } catch (error) {
-    console.error(error.message);
-    sendFailure(res, 500, "An Error Occured");
+    console.error(error);
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -100,8 +141,8 @@ const deleteJob = async (req, res) => {
     await Job.findByIdAndDelete(req.params.id);
     sendSuccess(res, 200, "Job deleted successfully");
   } catch (error) {
-    console.error(error.message);
-    res.status(500).json({ msg: error.message });
+    console.error(error);
+    sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -111,7 +152,7 @@ const getMyJobs = async (req, res) => {
     res.status(200).json({ success: true, status: 200, data: jobs });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: error.message });
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -151,6 +192,7 @@ const getJobs = async (req, res) => {
       .skip(skip)
       .limit(itemsPerPage);
     const totalJobs = await Job.countDocuments(query);
+    const noDraftJobs = jobs.filter((job) => !job.isDraft);
     const totalPages = Math.ceil(totalJobs / itemsPerPage);
     res.status(200).json({
       success: true,
@@ -161,11 +203,11 @@ const getJobs = async (req, res) => {
         count: jobs.length,
         total: totalJobs,
       },
-      data: jobs,
+      data: noDraftJobs,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: error.message });
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
@@ -180,9 +222,6 @@ const getJob = async (req, res) => {
     }
     const job = await Job.findById(req.params.id);
     if (!job) sendFailure(res, 404, "Job not found");
-    if (job.postedBy.toString() !== req.user.id) {
-      sendFailure(res, 401, "You are not authorized to view this job");
-    }
     const new_job = job.toObject();
     new_job.id = new_job._id;
     delete new_job._id;
@@ -190,7 +229,7 @@ const getJob = async (req, res) => {
     sendSuccess(res, 200, "Job retrieved successfully", new_job);
   } catch (error) {
     console.log(error);
-    res.status(500).json({ msg: error.message });
+    return sendFailure(res, 500, "Oops something went wrong");
   }
 };
 
