@@ -3,7 +3,7 @@ name: Build and deploy Node.js app to Azure Web App - earnily
 on:
   push:
     branches:
-      - production
+      - master
   workflow_dispatch:
 
 jobs:
@@ -18,7 +18,7 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Install dependencies and PM2, build, and test
+      - name: Install dependencies, PM2, build, and test
         run: |
           npm install
           npm install pm2 -g
@@ -65,6 +65,10 @@ jobs:
           app-name: "earnily"
           slot-name: "Production"
           package: .
+
+      - name: "Install PM2 globally"
+        run: |
+          npm install pm2 -g
 
       - name: "Start the app with PM2"
         run: |
