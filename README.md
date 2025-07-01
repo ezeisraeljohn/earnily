@@ -178,9 +178,9 @@ Tests cover authentication, job posting, applications, and more.
 
 Interactive API documentation is available via Postman:
 
-[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw)
+[![Run in Postman](https://run.pstmn.io/button.svg)](https://documenter.getpostman.com/view/38873322/2sAYJ7gKUv)
 
-Or view the [full API documentation here](https://documenter.getpostman.com/view/38873322/2sAYBbdoiw).
+Or view the [full API documentation here](https://documenter.getpostman.com/view/38873322/2sAYJ7gKUv).
 
 ---
 
